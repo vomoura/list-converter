@@ -52,6 +52,11 @@
             flex-shrink: 0;
         }
 
+        .panel button {
+            flex: none;
+            margin-top: 8px;
+        }
+
         textarea {
             flex: 1;
             width: 100%;
@@ -75,15 +80,8 @@
             color: #5a6a8a;
         }
 
-        .btn-row {
-            flex-shrink: 0;
-            padding: 8px;
-            display: flex;
-            gap: 8px;
-        }
-
         button {
-            flex: 1;
+            width: 100%;
             padding: 12px 16px;
             border: none;
             border-radius: 6px;
@@ -164,15 +162,13 @@
         <div class="panel">
             <label for="input">Lista original:</label>
             <textarea id="input" placeholder="Cole sua lista aqui...&#10;Ex: 4 Elsa - The Fifth Spirit"></textarea>
+            <button id="convertBtn">Converter</button>
         </div>
         <div class="panel">
             <label for="output">Lista convertida:</label>
             <textarea id="output" readonly placeholder="A lista convertida aparecerá aqui..."></textarea>
+            <button id="copyBtn" disabled>Copiar</button>
         </div>
-    </div>
-    <div class="btn-row">
-        <button id="convertBtn">Converter</button>
-        <button id="copyBtn" disabled>Copiar</button>
     </div>
 
     <script>
