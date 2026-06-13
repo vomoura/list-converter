@@ -198,7 +198,9 @@
         }
 
         async function searchCard(fullName) {
-            const query = encodeURIComponent(fullName);
+            // Remove " - " pois a API trata "-" como operador de negação
+            const searchTerms = fullName.replace(/\s*-\s*/g, ' ');
+            const query = encodeURIComponent(searchTerms);
             const url = `https://api.lorcast.com/v0/cards/search?q=${query}`;
             const response = await fetch(url);
             if (!response.ok) {
