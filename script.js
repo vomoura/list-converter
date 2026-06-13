@@ -79,23 +79,19 @@ convertBtn.addEventListener('click', async () => {
     convertBtn.disabled = true;
     outputEl.value = '';
     copyBtn.disabled = true;
-    setStatus(`Convertendo... 0/${parsed.length}`);
+    setStatus(`Convertendo ${parsed.length} cartas...`);
 
-    const results = [];
-    let errors = [];
-
-    for (let i = 0; i < parsed.length; i++) {
-        const { qty, fullName } = parsed[i];
-        setStatus(`Convertendo... ${i + 1}/${parsed.length} - ${fullName}`);
+    const promises = parsed.map(async ({ qty, fullName }) => {
         try {
             const card = await searchCard(fullName);
-            const line = formatOutputLine(qty, fullName, card.collector_number, card.set.code);
-            results.push(line);
+            return formatOutputLine(qty, fullName, card.collector_number, card.set.code);
         } catch (err) {
-            errors.push(err.message);
-            results.push(`${qty} ${fullName} [ERRO: ${err.message}]`);
+            return `${qty} ${fullName} [ERRO: ${err.message}]`;
         }
-    }
+    });
+
+    const results = await Promise.all(promises);
+    const errors = results.filter(r => r.includes('[ERRO:'));
 
     outputEl.value = results.join('\n');
     copyBtn.disabled = false;
