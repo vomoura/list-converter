@@ -1,3 +1,4 @@
 {
+  "outputDirectory": ".",
   "alias": ["converter-lista.vercel.app"]
 }
