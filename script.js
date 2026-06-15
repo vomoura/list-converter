@@ -3,6 +3,34 @@ const outputEl = document.getElementById('output');
 const convertBtn = document.getElementById('convertBtn');
 const copyBtn = document.getElementById('copyBtn');
 const statusEl = document.getElementById('status');
+const toastEl = document.getElementById('toast');
+const toastClose = document.getElementById('toastClose');
+const toastProgress = document.getElementById('toastProgress');
+
+let toastTimeout = null;
+
+function showToast() {
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+    }
+    toastProgress.style.animation = 'none';
+    void toastProgress.offsetWidth; // force reflow
+    toastProgress.style.animation = 'toast-timer 3s linear forwards';
+    toastEl.classList.add('show');
+    toastTimeout = setTimeout(() => {
+        toastEl.classList.remove('show');
+    }, 3000);
+}
+
+function hideToast() {
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+    }
+    toastEl.classList.remove('show');
+    toastProgress.style.animation = 'none';
+}
+
+toastClose.addEventListener('click', hideToast);
 
 function setStatus(msg, type = '') {
     statusEl.textContent = msg;
@@ -107,10 +135,10 @@ convertBtn.addEventListener('click', async () => {
 copyBtn.addEventListener('click', async () => {
     try {
         await navigator.clipboard.writeText(outputEl.value);
-        setStatus('Copiado para a área de transferência!', 'success');
+        showToast();
     } catch (err) {
         outputEl.select();
         document.execCommand('copy');
-        setStatus('Copiado!', 'success');
+        showToast();
     }
 });

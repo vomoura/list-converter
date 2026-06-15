@@ -165,6 +165,71 @@ button:active:not(:disabled) {
     color: #6bcf7f;
 }
 
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2a2a28;
+    border: 1px solid #3a3a38;
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 280px;
+    max-width: 90vw;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    transition: bottom 0.3s ease;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.toast.show {
+    bottom: 24px;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--parchment);
+}
+
+.toast-close {
+    width: auto;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #7a7a78;
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--parchment);
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--indigo-light);
+    border-radius: 0 0 10px 10px;
+    width: 100%;
+    transform-origin: left;
+    animation: none;
+}
+
+@keyframes toast-timer {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
 /* Desktop layout */
 @media (min-width: 768px) {
     .container {
