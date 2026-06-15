@@ -1,3 +1,12 @@
+:root {
+    --indigo: #373B70;
+    --gold: #D3BA84;
+    --parchment: #E3CAA8;
+    --kelp: #1C1C1A;
+    --indigo-light: #4a4f8a;
+    --gold-dark: #b89d5e;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,21 +14,34 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #1a1a2e;
-    color: #e0e0e0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--kelp);
+    color: var(--parchment);
     height: 100dvh;
     display: flex;
     flex-direction: column;
 }
 
-h1 {
-    text-align: center;
+header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 16px;
-    font-size: 1.2rem;
-    background: #16213e;
-    border-bottom: 1px solid #0f3460;
+    background: var(--indigo);
+    border-bottom: 2px solid var(--gold);
     flex-shrink: 0;
+}
+
+.logo {
+    height: 36px;
+    width: auto;
+}
+
+h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--parchment);
+    letter-spacing: -0.02em;
 }
 
 .container {
@@ -27,8 +49,8 @@ h1 {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 8px;
-    gap: 8px;
+    padding: 12px;
+    gap: 12px;
 }
 
 .panel {
@@ -39,9 +61,12 @@ h1 {
 }
 
 .panel label {
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-    color: #a0a0c0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    color: var(--gold);
     flex-shrink: 0;
 }
 
@@ -53,72 +78,83 @@ h1 {
 textarea {
     flex: 1;
     width: 100%;
-    background: #0f3460;
-    color: #e0e0e0;
-    border: 1px solid #1a4080;
-    border-radius: 6px;
-    padding: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.8rem;
+    background: #2a2a28;
+    color: var(--parchment);
+    border: 1px solid #3a3a38;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
     resize: none;
     min-height: 0;
+    transition: border-color 0.2s;
 }
 
 textarea:focus {
     outline: none;
-    border-color: #4a90d9;
+    border-color: var(--gold);
 }
 
 textarea::placeholder {
-    color: #5a6a8a;
+    color: #5a5a58;
 }
 
 button {
     width: 100%;
     padding: 12px 16px;
     border: none;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 #convertBtn {
-    background: #4a90d9;
-    color: #fff;
+    background: var(--indigo);
+    color: var(--parchment);
+    border: 1px solid var(--indigo-light);
 }
 
-#convertBtn:hover {
-    background: #3a7bc8;
+#convertBtn:hover:not(:disabled) {
+    background: var(--indigo-light);
 }
 
 #convertBtn:disabled {
-    background: #3a5070;
+    background: #2d2f4a;
+    color: #6a6a8a;
     cursor: not-allowed;
 }
 
 #copyBtn {
-    background: #2ecc71;
-    color: #fff;
+    background: var(--gold);
+    color: var(--kelp);
 }
 
-#copyBtn:hover {
-    background: #27ae60;
+#copyBtn:hover:not(:disabled) {
+    background: var(--gold-dark);
 }
 
 #copyBtn:disabled {
-    background: #1a7a40;
+    background: #4a4538;
+    color: #7a7568;
     cursor: not-allowed;
 }
 
 .status {
     text-align: center;
     font-size: 0.8rem;
-    padding: 4px;
+    padding: 6px;
     min-height: 24px;
     flex-shrink: 0;
-    color: #a0a0c0;
+    color: var(--gold);
+    font-weight: 500;
 }
 
 .status.error {
@@ -126,23 +162,30 @@ button {
 }
 
 .status.success {
-    color: #2ecc71;
+    color: #6bcf7f;
 }
 
 /* Desktop layout */
 @media (min-width: 768px) {
     .container {
         flex-direction: row;
-        padding: 12px;
-        gap: 12px;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    header {
+        padding: 16px 24px;
+    }
+
+    .logo {
+        height: 42px;
     }
 
     h1 {
         font-size: 1.4rem;
-        padding: 16px;
     }
 
     textarea {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
     }
 }

@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor de Lista - Lorcana</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Conversor de Lista</h1>
+    <header>
+        <img src="public/illuminary.png" alt="Illuminary" class="logo">
+        <h1>Conversor de Lista</h1>
+    </header>
     <div class="status" id="status"></div>
     <div class="container">
         <div class="panel">
-            <label for="input">Lista original:</label>
+            <label for="input">Lista original</label>
             <textarea id="input" placeholder="4 Elsa - The Fifth Spirit&#10;4 Maximus - Team Champion&#10;3 Negaduck - Public Enemy Number One&#10;4 Mr. Incredible - Super Strong&#10;..."></textarea>
             <button id="convertBtn">Converter</button>
         </div>
         <div class="panel">
-            <label for="output">Lista convertida:</label>
+            <label for="output">Lista convertida</label>
             <textarea id="output" readonly placeholder="A lista convertida aparecerá aqui..."></textarea>
             <button id="copyBtn" disabled>Copiar</button>
         </div>
