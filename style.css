@@ -33,7 +33,7 @@ header {
 }
 
 .logo {
-    height: 36px;
+    height: 48px;
     width: auto;
 }
 
@@ -243,7 +243,7 @@ button:active:not(:disabled) {
     }
 
     .logo {
-        height: 42px;
+        height: 54px;
     }
 
     h1 {
