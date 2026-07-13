@@ -20,6 +20,34 @@ const INK_COLORS = {
     Amethyst: '#8E44AD'
 };
 
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+// Fetch image through CORS proxy and convert to data URL
+async function fetchImageAsDataUrl(url) {
+    try {
+        const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        const blob = await response.blob();
+        // Convert AVIF blob to PNG via canvas for broader compatibility
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(blob);
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = objectUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(objectUrl);
+        return canvas.toDataURL('image/png');
+    } catch {
+        return null;
+    }
+}
+
 async function fetchCardData(inputText) {
     const lines = inputText.trim().split('\n').filter(l => l.trim());
     const parsed = lines.map(line => {
@@ -40,7 +68,7 @@ async function fetchCardData(inputText) {
             if (data.results && data.results.length > 0) {
                 const card = data.results[0];
                 const imageUrl = card.image_uris?.digital?.normal || '';
-                results.push({ qty, name: fullName, imageUrl, ink: card.ink || null });
+                results.push({ qty, name: fullName, imageUrl, ink: card.ink || null, dataUrl: null });
             }
             await new Promise(r => setTimeout(r, 100));
         } catch {
@@ -62,7 +90,7 @@ function getGradientCSS(cards) {
     return `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
 }
 
-function renderPreviewHTML() {
+function renderPreviewHTML(useDataUrls) {
     if (cardData.length === 0) {
         imagePreview.innerHTML = '<p style="color:#7a7a78;text-align:center;padding:40px;">Nenhuma carta carregada.</p>';
         return;
@@ -73,9 +101,10 @@ function renderPreviewHTML() {
 
     let html = `<div class="image-grid" style="grid-template-columns: repeat(${columns}, 1fr);">`;
     for (const card of cardData) {
+        const src = (useDataUrls && card.dataUrl) ? card.dataUrl : card.imageUrl;
         html += `
             <div class="image-card">
-                <img src="${card.imageUrl}" alt="${card.name}">
+                <img src="${src}" alt="${card.name}">
                 <div class="image-card-qty">${card.qty}x</div>
             </div>
         `;
@@ -94,7 +123,8 @@ imageBtnEl.addEventListener('click', async () => {
     const inputText = document.getElementById('input').value;
     cardData = await fetchCardData(inputText);
 
-    renderPreviewHTML();
+    // Show preview immediately with original URLs
+    renderPreviewHTML(false);
     downloadBtn.disabled = false;
 });
 
@@ -116,7 +146,7 @@ colMinus.addEventListener('click', () => {
     if (columns > 4) {
         columns--;
         colCountEl.textContent = columns;
-        renderPreviewHTML();
+        renderPreviewHTML(false);
     }
 });
 
@@ -124,39 +154,54 @@ colPlus.addEventListener('click', () => {
     if (columns < 12) {
         columns++;
         colCountEl.textContent = columns;
-        renderPreviewHTML();
+        renderPreviewHTML(false);
     }
 });
 
-// Download PNG - use html2canvas with allowTaint to capture cross-origin images
+// Download PNG
 downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Gerando...';
 
     try {
-        // Wait for all images in preview to be fully loaded
+        // Fetch all images via CORS proxy and convert to data URLs
+        const promises = cardData.map(async (card) => {
+            if (!card.dataUrl) {
+                card.dataUrl = await fetchImageAsDataUrl(card.imageUrl);
+            }
+        });
+        await Promise.all(promises);
+
+        // Re-render preview with data URLs so html2canvas can capture them
+        renderPreviewHTML(true);
+
+        // Wait for images to load in DOM
         const imgs = imagePreview.querySelectorAll('img');
         await Promise.all(Array.from(imgs).map(img => {
-            if (img.complete) return Promise.resolve();
+            if (img.complete && img.naturalWidth > 0) return Promise.resolve();
             return new Promise(resolve => {
                 img.onload = resolve;
                 img.onerror = resolve;
             });
         }));
 
+        // Small delay to ensure rendering is complete
+        await new Promise(r => setTimeout(r, 200));
+
         const canvas = await html2canvas(imagePreview, {
-            allowTaint: true,
-            useCORS: false,
+            useCORS: true,
             scale: 2,
             logging: false,
-            backgroundColor: null,
-            imageTimeout: 0
+            backgroundColor: null
         });
 
         const link = document.createElement('a');
         link.download = 'decklist.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+
+        // Restore preview with original URLs (lighter)
+        renderPreviewHTML(false);
     } catch (err) {
         console.error('Erro ao gerar imagem:', err);
     }
