@@ -100,6 +100,17 @@ h1 {
     margin-top: 8px;
 }
 
+.output-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.output-actions button {
+    flex: 1;
+}
+
 textarea {
     flex: 1;
     width: 100%;
@@ -210,6 +221,22 @@ button:active:not(:disabled) {
 #copyBtn:disabled {
     background: #4a4538;
     color: #7a7568;
+    cursor: not-allowed;
+}
+
+#imageBtn {
+    background: var(--indigo);
+    color: var(--parchment);
+    border: 1px solid var(--indigo-light);
+}
+
+#imageBtn:hover:not(:disabled) {
+    background: var(--indigo-light);
+}
+
+#imageBtn:disabled {
+    background: #2d2f4a;
+    color: #6a6a8a;
     cursor: not-allowed;
 }
 
@@ -327,6 +354,7 @@ button:active:not(:disabled) {
     flex-direction: column;
     transform: scale(0.95);
     transition: transform 0.2s ease;
+    overflow: hidden;
 }
 
 .modal-overlay.show .modal {
@@ -517,6 +545,124 @@ button:active:not(:disabled) {
     background: rgba(255, 255, 255, 0.15);
 }
 
+/* Image Export Modal */
+.modal-large {
+    max-width: 95vw;
+    max-height: 90vh;
+    width: 900px;
+}
+
+.image-modal-body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 12px;
+}
+
+.columns-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.col-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: var(--parchment);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.col-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#colCount {
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+.image-preview-wrapper {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+.image-preview {
+    padding: 12px;
+    min-height: 200px;
+}
+
+.image-grid {
+    display: grid;
+    gap: 4px;
+}
+
+.image-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.image-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+}
+
+.image-card-qty {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    min-width: 16px;
+    text-align: center;
+}
+
+.modal-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #3a3a38;
+    flex-shrink: 0;
+}
+
+.download-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    color: var(--kelp);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.download-btn:hover:not(:disabled) {
+    background: var(--gold-dark);
+}
+
+.download-btn:disabled {
+    background: #4a4538;
+    color: #7a7568;
+    cursor: not-allowed;
+}
+
 /* Desktop layout */
 @media (min-width: 768px) {
     .container {
@@ -539,5 +685,33 @@ button:active:not(:disabled) {
 
     textarea {
         font-size: 0.82rem;
+    }
+
+    .image-grid {
+        gap: 6px;
+    }
+
+    .image-card-qty {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        top: 4px;
+        right: 4px;
+    }
+}
+
+/* Mobile: image modal fits content */
+@media (max-width: 767px) {
+    .modal-large {
+        max-width: 92vw;
+        max-height: 90vh;
+        width: auto;
+    }
+
+    .image-preview {
+        padding: 8px;
+    }
+
+    .image-grid {
+        gap: 2px;
     }
 }

@@ -2,6 +2,7 @@ const inputEl = document.getElementById('input');
 const outputEl = document.getElementById('output');
 const convertBtn = document.getElementById('convertBtn');
 const copyBtn = document.getElementById('copyBtn');
+const imageBtn = document.getElementById('imageBtn');
 const statusEl = document.getElementById('status');
 const toastEl = document.getElementById('toast');
 const toastClose = document.getElementById('toastClose');
@@ -60,6 +61,7 @@ function renderHistory() {
             inputEl.value = item.input;
             renderOutput(item.output.split('\n'));
             copyBtn.disabled = false;
+            imageBtn.disabled = false;
             historyOverlay.classList.remove('show');
             setStatus('Lista carregada do histórico.', 'success');
         });
@@ -229,6 +231,7 @@ convertBtn.addEventListener('click', async () => {
         inputEl.value = '';
         clearOutput();
         copyBtn.disabled = true;
+        imageBtn.disabled = true;
         convertBtn.textContent = 'Converter';
         convertBtn.dataset.mode = 'convert';
         convertBtn.classList.remove('clear-mode');
@@ -253,6 +256,7 @@ convertBtn.addEventListener('click', async () => {
     convertBtn.disabled = true;
     clearOutput();
     copyBtn.disabled = true;
+    imageBtn.disabled = true;
     setStatus(`Convertendo ${parsed.length} cartas...`);
 
     const promises = parsed.map(async ({ qty, fullName }) => {
@@ -269,6 +273,7 @@ convertBtn.addEventListener('click', async () => {
 
     renderOutput(results);
     copyBtn.disabled = false;
+    imageBtn.disabled = false;
     convertBtn.disabled = false;
 
     if (errors.length > 0) {

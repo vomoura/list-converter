@@ -66,7 +66,10 @@
       <div class="panel">
         <label for="output">Lista convertida</label>
         <div class="output-area" id="output"></div>
-        <button id="copyBtn" disabled>Copiar</button>
+        <div class="output-actions">
+          <button id="copyBtn" disabled>Copiar</button>
+          <button id="imageBtn" disabled>Gerar Imagem</button>
+        </div>
       </div>
     </div>
     <div class="toast" id="toast">
@@ -157,7 +160,32 @@
         </div>
       </div>
     </div>
+    <!-- Image Export Modal -->
+    <div class="modal-overlay" id="imageOverlay">
+      <div class="modal modal-large">
+        <div class="modal-header">
+          <h2>Gerar Imagem</h2>
+          <div class="columns-selector">
+            <button class="col-btn" id="colMinus">−</button>
+            <span id="colCount">8</span>
+            <button class="col-btn" id="colPlus">+</button>
+          </div>
+          <button class="modal-close" id="imageClose">&times;</button>
+        </div>
+        <div class="modal-body image-modal-body">
+          <div class="image-preview-wrapper">
+            <div class="image-preview" id="imagePreview"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="downloadBtn" class="download-btn" disabled>Baixar PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
     <script src="script.js"></script>
+    <script src="image-export.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
   </body>
 </html>
