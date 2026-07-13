@@ -6,6 +6,116 @@ const statusEl = document.getElementById('status');
 const toastEl = document.getElementById('toast');
 const toastClose = document.getElementById('toastClose');
 const toastProgress = document.getElementById('toastProgress');
+const historyBtn = document.getElementById('historyBtn');
+const historyOverlay = document.getElementById('historyOverlay');
+const historyClose = document.getElementById('historyClose');
+const historyList = document.getElementById('historyList');
+
+const MAX_HISTORY = 5;
+
+// --- History ---
+function getHistory() {
+    try {
+        return JSON.parse(localStorage.getItem('conversionHistory') || '[]');
+    } catch {
+        return [];
+    }
+}
+
+function saveToHistory(input, output) {
+    const history = getHistory();
+    history.unshift({
+        date: new Date().toISOString(),
+        input,
+        output,
+        cardCount: output.split('\n').length
+    });
+    if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+    localStorage.setItem('conversionHistory', JSON.stringify(history));
+}
+
+function renderHistory() {
+    const history = getHistory();
+    if (history.length === 0) {
+        historyList.innerHTML = '<p class="empty-state">Nenhuma conversão salva ainda.</p>';
+        return;
+    }
+    historyList.innerHTML = history.map((item, i) => {
+        const date = new Date(item.date);
+        const formatted = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const firstLine = item.output.split('\n')[0] || '';
+        return `
+            <div class="history-item" data-index="${i}">
+                <div class="history-item-date">${formatted}</div>
+                <div class="history-item-preview">${firstLine}</div>
+                <div class="history-item-count">${item.cardCount} carta${item.cardCount > 1 ? 's' : ''}</div>
+            </div>
+        `;
+    }).join('');
+
+    historyList.querySelectorAll('.history-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const index = parseInt(el.dataset.index);
+            const item = history[index];
+            inputEl.value = item.input;
+            renderOutput(item.output.split('\n'));
+            copyBtn.disabled = false;
+            historyOverlay.classList.remove('show');
+            setStatus('Lista carregada do histórico.', 'success');
+        });
+    });
+}
+
+historyBtn.addEventListener('click', () => {
+    renderHistory();
+    historyOverlay.classList.add('show');
+});
+
+historyClose.addEventListener('click', () => {
+    historyOverlay.classList.remove('show');
+});
+
+historyOverlay.addEventListener('click', (e) => {
+    if (e.target === historyOverlay) {
+        historyOverlay.classList.remove('show');
+    }
+});
+
+// --- About ---
+const aboutBtn = document.getElementById('aboutBtn');
+const aboutOverlay = document.getElementById('aboutOverlay');
+const aboutClose = document.getElementById('aboutClose');
+
+aboutBtn.addEventListener('click', () => {
+    aboutOverlay.classList.add('show');
+});
+
+aboutClose.addEventListener('click', () => {
+    aboutOverlay.classList.remove('show');
+});
+
+aboutOverlay.addEventListener('click', (e) => {
+    if (e.target === aboutOverlay) {
+        aboutOverlay.classList.remove('show');
+    }
+});
+
+// --- Copy Pix Key ---
+const copyPixBtn = document.getElementById('copyPixBtn');
+copyPixBtn.addEventListener('click', async () => {
+    try {
+        await navigator.clipboard.writeText('cafezinho@victormoura.dev');
+    } catch {
+        const temp = document.createElement('textarea');
+        temp.value = 'cafezinho@victormoura.dev';
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+    }
+    copyPixBtn.style.color = '#6bcf7f';
+    setTimeout(() => { copyPixBtn.style.color = ''; }, 1500);
+});
 
 let toastTimeout = null;
 
@@ -89,7 +199,43 @@ function formatOutputLine(qty, fullName, collectorNumber, setCode) {
     return `${qty} ${fullName} (${collectorNumber}) [QUALIDADE=NM][EDICAO=${formatSetCode(setCode)}]`;
 }
 
+function renderOutput(results) {
+    outputEl.innerHTML = results.map(line => {
+        const isError = line.includes('[ERRO:');
+        const cls = isError ? 'output-line error' : 'output-line';
+        return `<div class="${cls}">${escapeHtml(line)}</div>`;
+    }).join('');
+}
+
+function clearOutput() {
+    outputEl.innerHTML = '';
+}
+
+function getOutputText() {
+    return Array.from(outputEl.querySelectorAll('.output-line'))
+        .map(el => el.textContent)
+        .join('\n');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 convertBtn.addEventListener('click', async () => {
+    // If in "clear" mode, reset everything
+    if (convertBtn.dataset.mode === 'clear') {
+        inputEl.value = '';
+        clearOutput();
+        copyBtn.disabled = true;
+        convertBtn.textContent = 'Converter';
+        convertBtn.dataset.mode = 'convert';
+        convertBtn.classList.remove('clear-mode');
+        setStatus('');
+        return;
+    }
+
     const inputText = inputEl.value.trim();
     if (!inputText) {
         setStatus('Cole uma lista no campo de entrada.', 'error');
@@ -105,7 +251,7 @@ convertBtn.addEventListener('click', async () => {
     }
 
     convertBtn.disabled = true;
-    outputEl.value = '';
+    clearOutput();
     copyBtn.disabled = true;
     setStatus(`Convertendo ${parsed.length} cartas...`);
 
@@ -121,7 +267,7 @@ convertBtn.addEventListener('click', async () => {
     const results = await Promise.all(promises);
     const errors = results.filter(r => r.includes('[ERRO:'));
 
-    outputEl.value = results.join('\n');
+    renderOutput(results);
     copyBtn.disabled = false;
     convertBtn.disabled = false;
 
@@ -130,15 +276,28 @@ convertBtn.addEventListener('click', async () => {
     } else {
         setStatus(`Conversão concluída! ${parsed.length} cartas processadas.`, 'success');
     }
+
+    // Save to history
+    saveToHistory(inputText, results.join('\n'));
+
+    // Switch to "clear" mode
+    convertBtn.textContent = 'Limpar';
+    convertBtn.dataset.mode = 'clear';
+    convertBtn.classList.add('clear-mode');
 });
 
 copyBtn.addEventListener('click', async () => {
     try {
-        await navigator.clipboard.writeText(outputEl.value);
+        await navigator.clipboard.writeText(getOutputText());
         showToast();
     } catch (err) {
-        outputEl.select();
+        // Fallback: create temp textarea
+        const temp = document.createElement('textarea');
+        temp.value = getOutputText();
+        document.body.appendChild(temp);
+        temp.select();
         document.execCommand('copy');
+        document.body.removeChild(temp);
         showToast();
     }
 });

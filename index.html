@@ -1,41 +1,163 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Conversor de Lista - Lorcana</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="theme-color" content="#373B70">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" href="logo.png" />
+    <meta name="theme-color" content="#373B70" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <header>
-        <img src="logo.png" alt="logo" class="logo">
-        <h1>Conversor de Lista</h1>
+      <img src="logo.png" alt="logo" class="logo" />
+      <h1>Conversor de Lista</h1>
+      <div class="header-actions">
+        <button class="icon-btn" id="historyBtn" title="Conversões recentes">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </button>
+        <button class="icon-btn" id="aboutBtn" title="Sobre">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
+      </div>
     </header>
     <div class="status" id="status"></div>
     <div class="container">
-        <div class="panel">
-            <label for="input">Lista original</label>
-            <textarea id="input" placeholder="4 Elsa - The Fifth Spirit&#10;4 Maximus - Team Champion&#10;3 Negaduck - Public Enemy Number One&#10;4 Mr. Incredible - Super Strong&#10;..."></textarea>
-            <button id="convertBtn">Converter</button>
-        </div>
-        <div class="panel">
-            <label for="output">Lista convertida</label>
-            <textarea id="output" readonly placeholder="A lista convertida aparecerá aqui..."></textarea>
-            <button id="copyBtn" disabled>Copiar</button>
-        </div>
+      <div class="panel">
+        <label for="input">Lista original</label>
+        <textarea
+          id="input"
+          placeholder="4 Elsa - The Fifth Spirit&#10;4 Maximus - Team Champion&#10;3 Negaduck - Public Enemy Number One&#10;4 Mr. Incredible - Super Strong&#10;..."
+        ></textarea>
+        <button id="convertBtn">Converter</button>
+      </div>
+      <div class="panel">
+        <label for="output">Lista convertida</label>
+        <div class="output-area" id="output"></div>
+        <button id="copyBtn" disabled>Copiar</button>
+      </div>
     </div>
     <div class="toast" id="toast">
-        <span class="toast-message">Lista copiada</span>
-        <button class="toast-close" id="toastClose">&times;</button>
-        <div class="toast-progress" id="toastProgress"></div>
+      <span class="toast-message">Lista copiada</span>
+      <button class="toast-close" id="toastClose">&times;</button>
+      <div class="toast-progress" id="toastProgress"></div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay" id="historyOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Conversões recentes</h2>
+          <button class="modal-close" id="historyClose">&times;</button>
+        </div>
+        <div class="modal-body" id="historyList">
+          <p class="empty-state">Nenhuma conversão salva ainda.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal-overlay" id="aboutOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Sobre</h2>
+          <button class="modal-close" id="aboutClose">&times;</button>
+        </div>
+        <div class="modal-body about-content">
+          <p>
+            Conversor de listas de cartas do Disney Lorcana TCG para o formato
+            de importação da
+            <a
+              href="https://www.ligalorcana.com.br/"
+              target="_blank"
+              rel="noopener"
+              >LigaLorcana</a
+            >.
+          </p>
+          <p>
+            Cole sua decklist no formato simples e obtenha a lista formatada com
+            número do colecionador e edição, prontos para importar.
+          </p>
+          <div class="about-section">
+            <h3>Como usar</h3>
+            <ol>
+              <li>Cole sua lista no campo da esquerda</li>
+              <li>Clique em <strong>Converter</strong></li>
+              <li>Copie o resultado com o botão <strong>Copiar</strong></li>
+            </ol>
+          </div>
+          <div class="about-section pix-section">
+            <p>
+              Esse site te ajudou hoje?<br>Qualquer valor já ajuda a pagar um
+              cafezinho! ☕
+            </p>
+            <div class="pix-qrcode">
+              <img src="qrcode-pix.png" alt="QR Code Pix" />
+            </div>
+            <div class="pix-key">
+              <span>Chave Pix: <strong>cafezinho@victormoura.dev</strong></span>
+              <button
+                class="copy-pix-btn"
+                id="copyPixBtn"
+                title="Copiar chave Pix"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path
+                    d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="about-footer">
+            <p>Desenvolvido por <strong>Victor Moura</strong></p>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="script.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
-</body>
+  </body>
 </html>
