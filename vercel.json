@@ -1,4 +1,9 @@
 {
   "outputDirectory": ".",
-  "alias": ["converter-lista.vercel.app"]
+  "alias": ["converter-lista.vercel.app"],
+  "functions": {
+    "api/proxy-image.js": {
+      "memory": 128
+    }
+  }
 }

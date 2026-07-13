@@ -20,9 +20,9 @@ const INK_COLORS = {
     Amethyst: '#8E44AD'
 };
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = '/api/proxy-image?url=';
 
-// Fetch image through CORS proxy and convert to data URL
+// Fetch image through our own proxy and convert to data URL
 async function fetchImageAsDataUrl(url) {
     try {
         const proxyUrl = CORS_PROXY + encodeURIComponent(url);
@@ -104,7 +104,7 @@ function renderPreviewHTML(useDataUrls) {
         const src = (useDataUrls && card.dataUrl) ? card.dataUrl : card.imageUrl;
         html += `
             <div class="image-card">
-                <img src="${src}" alt="${card.name}">
+                <img src="${src}" alt="${card.name}" loading="eager">
                 <div class="image-card-qty">${card.qty}x</div>
             </div>
         `;
@@ -190,7 +190,8 @@ downloadBtn.addEventListener('click', async () => {
 
         const canvas = await html2canvas(imagePreview, {
             useCORS: true,
-            scale: 2,
+            allowTaint: true,
+            scale: 3,
             logging: false,
             backgroundColor: null
         });
