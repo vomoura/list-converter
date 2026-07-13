@@ -9,7 +9,7 @@ const colPlus = document.getElementById('colPlus');
 const colCountEl = document.getElementById('colCount');
 
 let columns = 8;
-let cardImages = [];
+let cardData = []; // [{qty, name, imageUrl, ink}]
 
 const INK_COLORS = {
     Sapphire: '#2980B9',
@@ -20,32 +20,7 @@ const INK_COLORS = {
     Amethyst: '#8E44AD'
 };
 
-async function imageToBase64(url) {
-    try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        // Convert to PNG via canvas to ensure html2canvas compatibility
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        const objectUrl = URL.createObjectURL(blob);
-        await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = objectUrl;
-        });
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(objectUrl);
-        return canvas.toDataURL('image/png');
-    } catch {
-        return null;
-    }
-}
-
-async function fetchCardImages(inputText) {
+async function fetchCardData(inputText) {
     const lines = inputText.trim().split('\n').filter(l => l.trim());
     const parsed = lines.map(line => {
         const match = line.trim().match(/^(\d+)\s+(.+)$/);
@@ -77,38 +52,132 @@ async function fetchCardImages(inputText) {
 
 function getGradient(cards) {
     const inks = [...new Set(cards.map(c => c.ink).filter(Boolean))];
-    if (inks.length === 0) return 'linear-gradient(135deg, #1C1C1A 0%, #2a2a28 100%)';
+    if (inks.length === 0) return ['#1C1C1A', '#2a2a28'];
     if (inks.length === 1) {
         const c = INK_COLORS[inks[0]] || '#1C1C1A';
-        return `linear-gradient(135deg, ${c} 0%, ${c}80 100%)`;
+        return [c, c + '80'];
     }
     const c1 = INK_COLORS[inks[0]] || '#1C1C1A';
     const c2 = INK_COLORS[inks[1]] || '#2a2a28';
+    return [c1, c2];
+}
+
+function getGradientCSS(cards) {
+    const [c1, c2] = getGradient(cards);
     return `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
 }
 
-function renderImagePreview() {
-    if (cardImages.length === 0) {
+// Load an image and return it as a loaded HTMLImageElement
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => {
+            // Try without crossOrigin as fallback
+            const img2 = new Image();
+            img2.onload = () => resolve(img2);
+            img2.onerror = reject;
+            img2.src = url;
+        };
+        img.src = url;
+    });
+}
+
+function renderPreviewHTML() {
+    if (cardData.length === 0) {
         imagePreview.innerHTML = '<p style="color:#7a7a78;text-align:center;padding:40px;">Nenhuma carta carregada.</p>';
         return;
     }
 
-    const gradient = getGradient(cardImages);
-    imagePreview.style.background = gradient;
+    imagePreview.style.background = getGradientCSS(cardData);
     imagePreview.style.borderRadius = '8px';
 
     let html = `<div class="image-grid" style="grid-template-columns: repeat(${columns}, 1fr);">`;
-    for (const card of cardImages) {
-        const src = card.base64 || card.imageUrl;
+    for (const card of cardData) {
         html += `
             <div class="image-card">
-                <img src="${src}" alt="${card.name}">
+                <img src="${card.imageUrl}" alt="${card.name}">
                 <div class="image-card-qty">${card.qty}x</div>
             </div>
         `;
     }
     html += '</div>';
     imagePreview.innerHTML = html;
+}
+
+// Generate the PNG using pure Canvas API (bypasses html2canvas CORS issues)
+async function generateCanvasPNG() {
+    const gap = 8;
+    const padding = 24;
+    const cardWidth = 200;
+    const cardRatio = 1.4; // approximate card height/width ratio
+    const cardHeight = Math.round(cardWidth * cardRatio);
+    const badgeHeight = 22;
+    const badgePadding = 6;
+
+    const rows = Math.ceil(cardData.length / columns);
+    const totalWidth = padding * 2 + columns * cardWidth + (columns - 1) * gap;
+    const totalHeight = padding * 2 + rows * cardHeight + (rows - 1) * gap;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = totalWidth;
+    canvas.height = totalHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Draw gradient background
+    const [c1, c2] = getGradient(cardData);
+    const grad = ctx.createLinearGradient(0, 0, totalWidth, totalHeight);
+    grad.addColorStop(0, c1);
+    grad.addColorStop(1, c2);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+    // Draw cards
+    for (let i = 0; i < cardData.length; i++) {
+        const card = cardData[i];
+        const col = i % columns;
+        const row = Math.floor(i / columns);
+        const x = padding + col * (cardWidth + gap);
+        const y = padding + row * (cardHeight + gap);
+
+        // Try to load and draw the image
+        try {
+            const img = await loadImage(card.imageUrl);
+            // Draw with rounded corners
+            const radius = 10;
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(x, y, cardWidth, cardHeight, radius);
+            ctx.clip();
+            ctx.drawImage(img, x, y, cardWidth, cardHeight);
+            ctx.restore();
+        } catch {
+            // Draw placeholder
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x, y, cardWidth, cardHeight);
+        }
+
+        // Draw quantity badge
+        const badgeText = `${card.qty}x`;
+        ctx.font = 'bold 14px Inter, sans-serif';
+        const textWidth = ctx.measureText(badgeText).width;
+        const bw = textWidth + badgePadding * 2;
+        const bx = x + cardWidth - bw - 6;
+        const by = y + 6;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, badgeHeight, 5);
+        ctx.fill();
+
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, bx + bw / 2, by + badgeHeight / 2);
+    }
+
+    return canvas;
 }
 
 // Open modal
@@ -119,13 +188,9 @@ imageBtnEl.addEventListener('click', async () => {
     downloadBtn.disabled = true;
 
     const inputText = document.getElementById('input').value;
-    cardImages = await fetchCardImages(inputText);
+    cardData = await fetchCardData(inputText);
 
-    for (const card of cardImages) {
-        card.base64 = await imageToBase64(card.imageUrl);
-    }
-
-    renderImagePreview();
+    renderPreviewHTML();
     downloadBtn.disabled = false;
 });
 
@@ -147,7 +212,7 @@ colMinus.addEventListener('click', () => {
     if (columns > 4) {
         columns--;
         colCountEl.textContent = columns;
-        renderImagePreview();
+        renderPreviewHTML();
     }
 });
 
@@ -155,30 +220,39 @@ colPlus.addEventListener('click', () => {
     if (columns < 12) {
         columns++;
         colCountEl.textContent = columns;
-        renderImagePreview();
+        renderPreviewHTML();
     }
 });
 
-// Download PNG
+// Download PNG via Canvas API
 downloadBtn.addEventListener('click', async () => {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Gerando...';
 
     try {
-        const canvas = await html2canvas(imagePreview, {
-            useCORS: true,
-            allowTaint: true,
-            scale: 3,
-            logging: false,
-            backgroundColor: null
-        });
-
+        const canvas = await generateCanvasPNG();
         const link = document.createElement('a');
         link.download = 'decklist.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     } catch (err) {
         console.error('Erro ao gerar imagem:', err);
+        // Fallback: try html2canvas
+        try {
+            const canvas = await html2canvas(imagePreview, {
+                useCORS: true,
+                allowTaint: true,
+                scale: 2,
+                logging: false,
+                backgroundColor: null
+            });
+            const link = document.createElement('a');
+            link.download = 'decklist.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (err2) {
+            console.error('Fallback também falhou:', err2);
+        }
     }
 
     downloadBtn.disabled = false;
