@@ -24,12 +24,22 @@ async function imageToBase64(url) {
     try {
         const response = await fetch(url);
         const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
+        // Convert to PNG via canvas to ensure html2canvas compatibility
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const objectUrl = URL.createObjectURL(blob);
+        await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = objectUrl;
         });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(objectUrl);
+        return canvas.toDataURL('image/png');
     } catch {
         return null;
     }
