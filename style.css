@@ -187,6 +187,10 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 button:active:not(:disabled) {
