@@ -580,6 +580,35 @@ button:active:not(:disabled) {
     padding: 12px;
 }
 
+.image-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+}
+
+.image-modal-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 8px;
+}
+
+.image-modal-header-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 20px 12px;
+    border-bottom: 1px solid #3a3a38;
+}
+
+.columns-label {
+    font-size: 0.85rem;
+    color: var(--parchment);
+    font-weight: 500;
+}
+
 .columns-selector {
     display: flex;
     align-items: center;

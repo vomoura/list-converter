@@ -166,14 +166,19 @@
     <!-- Image Export Modal -->
     <div class="modal-overlay" id="imageOverlay">
       <div class="modal modal-large">
-        <div class="modal-header">
-          <h2>Gerar Imagem</h2>
-          <div class="columns-selector">
-            <button class="col-btn" id="colMinus">−</button>
-            <span id="colCount">8</span>
-            <button class="col-btn" id="colPlus">+</button>
+        <div class="modal-header image-modal-header">
+          <div class="image-modal-header-top">
+            <h2>Gerar Imagem</h2>
+            <button class="modal-close" id="imageClose">&times;</button>
           </div>
-          <button class="modal-close" id="imageClose">&times;</button>
+          <div class="image-modal-header-bottom">
+            <span class="columns-label">Colunas:</span>
+            <div class="columns-selector">
+              <button class="col-btn" id="colMinus">−</button>
+              <span id="colCount">8</span>
+              <button class="col-btn" id="colPlus">+</button>
+            </div>
+          </div>
         </div>
         <div class="modal-body image-modal-body">
           <div class="image-preview-wrapper">
