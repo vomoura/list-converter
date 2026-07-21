@@ -97,7 +97,17 @@ h1 {
 
 .panel button {
     flex: none;
+}
+
+.input-actions {
+    display: flex;
+    gap: 8px;
     margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.input-actions button {
+    flex: 1;
 }
 
 .output-actions {
@@ -199,14 +209,21 @@ button:active:not(:disabled) {
     cursor: not-allowed;
 }
 
-#convertBtn.clear-mode {
+#clearBtn {
     background: #3a2a2a;
-    border-color: #6b3a3a;
+    border: 1px solid #6b3a3a;
     color: #e08080;
 }
 
-#convertBtn.clear-mode:hover {
+#clearBtn:hover:not(:disabled) {
     background: #4a3030;
+}
+
+#clearBtn:disabled {
+    background: #2a2222;
+    color: #5a4040;
+    border-color: #3a2a2a;
+    cursor: not-allowed;
 }
 
 #copyBtn {

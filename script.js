@@ -1,6 +1,7 @@
 const inputEl = document.getElementById('input');
 const outputEl = document.getElementById('output');
 const convertBtn = document.getElementById('convertBtn');
+const clearBtn = document.getElementById('clearBtn');
 const copyBtn = document.getElementById('copyBtn');
 const imageBtn = document.getElementById('imageBtn');
 const statusEl = document.getElementById('status');
@@ -64,6 +65,7 @@ function renderHistory() {
             imageBtn.disabled = false;
             historyOverlay.classList.remove('show');
             setStatus('Lista carregada do histórico.', 'success');
+            updateClearBtn();
         });
     });
 }
@@ -225,20 +227,14 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-convertBtn.addEventListener('click', async () => {
-    // If in "clear" mode, reset everything
-    if (convertBtn.dataset.mode === 'clear') {
-        inputEl.value = '';
-        clearOutput();
-        copyBtn.disabled = true;
-        imageBtn.disabled = true;
-        convertBtn.textContent = 'Converter';
-        convertBtn.dataset.mode = 'convert';
-        convertBtn.classList.remove('clear-mode');
-        setStatus('');
-        return;
-    }
+// --- Clear button state management ---
+function updateClearBtn() {
+    clearBtn.disabled = !inputEl.value.trim();
+}
 
+inputEl.addEventListener('input', updateClearBtn);
+
+convertBtn.addEventListener('click', async () => {
     const inputText = inputEl.value.trim();
     if (!inputText) {
         setStatus('Cole uma lista no campo de entrada.', 'error');
@@ -284,11 +280,15 @@ convertBtn.addEventListener('click', async () => {
 
     // Save to history
     saveToHistory(inputText, results.join('\n'));
+});
 
-    // Switch to "clear" mode
-    convertBtn.textContent = 'Limpar';
-    convertBtn.dataset.mode = 'clear';
-    convertBtn.classList.add('clear-mode');
+clearBtn.addEventListener('click', () => {
+    inputEl.value = '';
+    clearOutput();
+    copyBtn.disabled = true;
+    imageBtn.disabled = true;
+    setStatus('');
+    updateClearBtn();
 });
 
 copyBtn.addEventListener('click', async () => {
